@@ -43,8 +43,81 @@
 
 ## 6.3 조건 분기 중복과 중첩
 
+- interface는 switch 조건문의 중복을 제거할 수 있을 뿐만 아니라, 다중 중첩된 복잡한 분기를제거하는 데 활용할 수 있다.
+- 정책 패턴 (policy pattern): 조건을 부품처러 만들고, 부품으로 만든 조건을 조합해서 사용하는 패턴
+  - interface 선언
+
+    ``` java
+    // interface 선언
+    interface ExcellentCustomerRule {
+        boolean ok(final PurchaseHistory history)
+    }
+    ```
+
+  - 정책에 대한 검증 클래스 선언
+
+    ```java
+    class GoldCustomerPurchaseAmountRule implements ExcellentCustomerRule {
+        public boolean ok(final PurchaseHistory history) {
+            return 100_000 <= history.totalAmoint;
+        }
+    }
+    ```
+
+    ```java
+    class PurchaseFrequencyRule implements ExcellentCustomerRule {
+        public boolean ok(final PurchaseHistory history) {
+            return 10 <= history.purchaseFrequencyPerMonth;
+        }
+    }
+    ```
+
+    ```java
+    class ReturnRateRule implements ExcellentCustomerRule {
+        public boolean ok(final PurchaseHistory history) {
+            return history.returnRate <= 0.001;
+        }
+    }
+    ```
+
+- 정책 클래스 선언
+
+    ``` java
+    class ExcellentCustomerPolicy {
+        private final Ser<ExcellentCustomerRule> rules;
+
+
+        ExcellentCustomerPolicy() {
+            rules = new HashSet();
+        }
+
+        /**
+         * 규칙추가
+         */
+        void add(final ExcellentCustomerRule rule) {
+            rules.add(rule);
+        }
+        
+        boolean complyWithAll(final PurchaseHistory history) {
+            for (ExcellentCustomerRule each : rules) {
+                if(each.ok(history).not()) return false;
+            }
+            return true;
+        } 
+    }
+    ```
+
 ## 6.4 자료형 확인에 조건 분기 사용하지 않기
+
+- java에서 `instanceof`는 자료형을 판정하는 연산자이다.
+- 자료형을 판정하는 연산자를 사용하여 데이터를 확인하는 경우 조건 분기를 사용하면 요구사항이 추가 되는 경우마다 조건 분기가 계속 추가된다. -> 리스코프 치환 원칙 위반
+- 그러기 때문에 `instanceof`처럼 차료형을 판정하는 연산자를 사용할 때는 코드의 구조를 변경하여 사용하도록 해애한다.
 
 ## 6.5 인터페이스 사용 능력이 중급으로 올라가는 첫걸음
 
+- 여기는 그냥 인터페이스를 잘 사용하자라는거군...
+
 ## 6.6 플래그 매개변수
+
+- booelan 타입의 매개 변수를 플래그 매개변수라고 하며, 플래그 매개변수는 어떤 일을 하는지 예측하기 어렵다는 단점이 있다.
+- 플래그 매개변수를 받는 메서드는 기능별로 분리하는 것이 좋다.
